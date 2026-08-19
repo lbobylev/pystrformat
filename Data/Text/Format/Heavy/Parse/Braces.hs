@@ -42,6 +42,19 @@ escapes =
 anyChar' :: Parser Char
 anyChar' = choice [try (c <$ string s) | (s, c) <- escapes] <|> noneOf "{}"
 
+formatSpecChar :: Parser String
+formatSpecChar = try nestedBraces <|> ((: []) <$> anyChar')
+ where
+  nestedBraces = do
+    char '{'
+    inner <- concat <$> many nestedFormatSpecChar
+    char '}'
+    return $ "{" ++ inner ++ "}"
+
+  nestedFormatSpecChar = try nestedBraces <|> escapedOpenBrace <|> ((: []) <$> noneOf "{}")
+
+  escapedOpenBrace = "{" <$ string "{{"
+
 pVerbatim :: Parser FormatItem
 pVerbatim = (FString . TL.pack) `fmap` many1 anyChar'
 
@@ -56,7 +69,7 @@ pVariable = do
     fmt <- case mbColon of
       Nothing -> return Nothing
       Just _ -> do
-        fmtStr <- many anyChar'
+        fmtStr <- concat <$> many formatSpecChar
         return $ Just $ TL.pack fmtStr
     name' <-
       if null name
