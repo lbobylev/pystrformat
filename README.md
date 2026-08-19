@@ -1,69 +1,165 @@
-text-format-heavy README
-========================
+# pystrformat
 
-[![Build Status](https://travis-ci.org/portnov/text-format-heavy.svg?branch=master)](https://travis-ci.org/portnov/text-format-heavy)
+> **Project origin**
+>
+> `pystrformat` is a maintained continuation of
+> [`text-format-heavy`](https://github.com/portnov/text-format-heavy) by Portnov.
+> It preserves the original library's core ideas and functionality while
+> continuing development independently under a new name.
 
-This is Haskell string formatting library, which prefers functionality and
-extendability over light weight and (probably, in some cases) performance.
-This library is more or less analog of Python's string.format function, and
-has similar syntax. It also exposes all required interfaces to extend and
-customize it.
+`pystrformat` is a flexible and extensible string-formatting library for Haskell.
 
-Most notable features are:
+It provides formatting inspired by Python's `str.format()` syntax while keeping
+the formatting engine open to custom syntaxes, variable containers, and
+user-defined formatting rules.
 
- * Automatically numbered variable placeholders (`{}`);
- * Positional variable placeholders (`{1}`);
- * Named variable placeholders (`{name}`);
- * Placeholders can be used in any order; one variable can be used several
-   times or not used at all.
- * Specific format can be used for each variable substitution (`{0:+8.4}`).
+## Features
 
-Formatting strings are present by `Format` type. Values of this type can be
-parsed from lazy Text, or can be entered as string literals, since `Format`
-implements `IsString`.
+`pystrformat` supports:
 
-There are two syntaxes of formatting strings defined by this package:
+- Automatically numbered placeholders: `{}`;
+- Positional placeholders: `{0}`, `{1}`;
+- Named placeholders: `{name}`;
+- Placeholders in arbitrary order;
+- Reusing the same variable multiple times;
+- Ignoring variables that are not referenced by the format string;
+- Per-value format specifications, such as `{0:+8.4}`.
 
-* Default Python-like syntax, which is generally described as "anything in
-  braces is a variable substitution". `instance IsString Format` uses this
-  syntax.
-* Alternative Shell-like syntax, which is generally described as "anything
-  after dollar sign is a variable substitution".
+The library favors **functionality and extensibility** over having the smallest
+possible implementation or maximizing performance in every use case.
 
-It is possible to implement custom syntaxes of format strings: you just need to
-parse instances of `Format` type from some sort of strings.
+## Format strings
 
-The `format` function takes a `Format` specification and a container with
-variables. Container types are generalized by `VarContainer` type class.
-Standard container implementations include:
+Formatting specifications are represented by the `Format` type.
 
- * `Single` type for case when you need to pass only one variable.
- * Tuples and lists. These contain numbered variables, i.e. `{0}`, `{1}`, etc.
- * `[(Text, a)]` and `Map Text a`. These contain named variables, i.e.
-   `{name}`.
+A `Format` value can be parsed from lazy `Text`. Since `Format` implements
+`IsString`, format strings can also be written directly as string literals.
 
-One can implement custom variable containers, for example some record types.
+For example:
 
-Types of variables that can be used for subsitiution are generalized by
-`Formatable` type class. Each implementation defines default value formatting
-rules, and a syntax of variable format specification. For example, for
-integers, floats and strings, python-like syntax is used. Standard set of
-variable types includes:
+    format "Hello, {name}!" variables
 
- * Integers (`Int`, `Integer`, `Int8..64`, `Word8..64`, others can be easily added);
- * Floats (`Float` and `Double`);
- * Strings (`String`, lazy and strict `ByteString`, lazy and strict `Text`);
- * Booleans;
- * Time/date values from Data.Time.
- * Any instance of `Show` type class can be used by packing it into `Shown`
-   constructor.
+## Formatting syntaxes
 
-One can implement custom variable types.
+The package provides two built-in formatting syntaxes.
 
-For examples, please refer to [GitHub wiki][1] and `examples/`
-directory in this repo. There are also some examples in haddock documentation.
+### Python-like syntax
 
-License: BSD3.
+This is the default syntax and the one used by the `IsString Format` instance.
 
-[1]: https://github.com/portnov/text-format-heavy/wiki
+Anything enclosed in braces is interpreted as a variable substitution:
 
+    {}
+    {0}
+    {name}
+    {0:+8.4}
+
+The syntax is intentionally similar to Python's `str.format()`.
+
+### Shell-like syntax
+
+An alternative shell-inspired syntax is also available, where variable
+substitutions are introduced with a dollar sign.
+
+## Custom syntaxes
+
+The formatting syntax is not hard-coded into the rest of the library.
+
+Custom syntaxes can be implemented by parsing input into values of the `Format`
+type. This allows applications to provide their own notation while continuing to
+use the same formatting engine.
+
+## Variable containers
+
+The `format` function takes a `Format` specification and a container of
+variables.
+
+Variable containers are generalized by the `VarContainer` type class.
+
+Built-in containers include:
+
+- `Single` for formatting a single value;
+- tuples;
+- lists;
+- `[(Text, a)]`;
+- `Map Text a`.
+
+Tuples and lists provide positional variables:
+
+    {0}
+    {1}
+    {2}
+
+Association lists and maps provide named variables:
+
+    {name}
+    {count}
+    {value}
+
+Applications can define their own `VarContainer` instances as well. For example,
+a record type can expose its fields directly as formatting variables.
+
+## Formattable values
+
+Values that can participate in substitutions are generalized through the
+`Formatable` type class.
+
+A `Formatable` instance defines:
+
+- how a value is formatted by default;
+- which format specifications the value understands.
+
+The built-in instances cover common Haskell types, including:
+
+- integers:
+  - `Int`
+  - `Integer`
+  - `Int8` through `Int64`
+  - `Word8` through `Word64`
+- floating-point values:
+  - `Float`
+  - `Double`
+- strings and text:
+  - `String`
+  - strict and lazy `Text`
+  - strict and lazy `ByteString`
+- `Bool`
+- date and time values from `Data.Time`
+
+Additional numeric types can be supported by providing suitable instances.
+
+Any value with a `Show` instance can also be formatted by wrapping it in the
+`Shown` constructor.
+
+Custom application types can implement `Formatable` directly to provide their
+own formatting behavior and format-specification syntax.
+
+## Extensibility
+
+The library is designed so that the main pieces of the formatting system can be
+replaced or extended independently.
+
+You can define:
+
+- custom format-string syntaxes;
+- custom variable containers through `VarContainer`;
+- custom value formatting through `Formatable`.
+
+This makes `pystrformat` suitable not only as a Python-style formatting library,
+but also as a foundation for application-specific formatting and templating
+conventions.
+
+## Examples
+
+See the `examples/` directory and Haddock documentation for usage examples.
+
+The original project's examples and documentation may also be useful when
+working with compatible parts of the API:
+
+[`text-format-heavy`](https://github.com/portnov/text-format-heavy)
+
+## License
+
+BSD-3-Clause.
+
+See the `LICENSE` file for the complete license terms and copyright notices.
