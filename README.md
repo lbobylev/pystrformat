@@ -47,6 +47,8 @@ Anything enclosed in braces is interpreted as a variable substitution:
     {name}
     {0:+8.4}
 
+Literal braces can be escaped as `{{` and `}}`.
+
 The syntax is intentionally similar to Python's `str.format()`.
 
 ### Shell-like syntax

@@ -71,6 +71,14 @@ main = hspec $ do
       format "present: {0}; missing: {1}" (optional (Single ("value" :: String)))
         `shouldBe` "present: value; missing: "
 
+    it "handles escaped braces" $ do
+      format "{{}}" () `shouldBe` "{}"
+      format "\\{name\\}" () `shouldBe` "{name}"
+      format "{{{name}}}" ([ ("name", "world" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+        `shouldBe` "{world}"
+      format "json: {{\"answer\": \"{answer}\"}}" ([ ("answer", "ok" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+        `shouldBe` "json: {\"answer\": \"ok\"}"
+
   describe "documentation" $ do
     it "formats examples from wiki" $ do
       format "hex: {:#x}" (Single (427 :: Int)) `shouldBe` "hex: 0x1ab"
