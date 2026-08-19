@@ -1,7 +1,7 @@
 # pystrformat
 
-`pystrformat` is a Haskell string-formatting library inspired by Python's
-`str.format()` syntax.
+`pystrformat` is a continuation of [`text-format-heavy`](https://github.com/portnov/text-format-heavy),
+originally created by Ilya Portnov, and provides Haskell string formatting inspired by Python's `str.format()` syntax.
 
 It supports positional and named placeholders, per-value format specs, custom
 variable containers, and custom `Formatable` instances.
