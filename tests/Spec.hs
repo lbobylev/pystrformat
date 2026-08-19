@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Test.Hspec
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
-import Data.Time
-import qualified Data.Map as Map
 import Data.Map (Map)
+import qualified Data.Map as Map
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
+import Data.Time
+import Test.Hspec
 
 import Data.Text.Format.Heavy
 import Data.Text.Format.Heavy.Build (formatEither)
@@ -36,37 +36,43 @@ main = hspec $ do
       format "lazy: {}" (Single (BSL.pack [104, 101, 108, 108, 111])) `shouldBe` "lazy: hello"
 
     it "handles parameter numbers" $ do
-      format "one: {0}, two: {1}" ((1:: Int), (2::Int)) `shouldBe` "one: 1, two: 2"
-      format "two: {1}, one: {0}" ((1:: Int), (2::Int)) `shouldBe` "two: 2, one: 1"
+      format "one: {0}, two: {1}" ((1 :: Int), (2 :: Int)) `shouldBe` "one: 1, two: 2"
+      format "two: {1}, one: {0}" ((1 :: Int), (2 :: Int)) `shouldBe` "two: 2, one: 1"
 
     describe "handles parameters names" $ do
       it "with ascii characters" $ do
-        format "one: {theKey}!"
+        format
+          "one: {theKey}!"
           ((Map.singleton "theKey" "the string") :: Map TL.Text TL.Text)
-            `shouldBe` "one: the string!"
+          `shouldBe` "one: the string!"
       it "with dots" $ do
-        format "one: {the.key}!"
+        format
+          "one: {the.key}!"
           ((Map.singleton "the.key" "the string") :: Map TL.Text TL.Text)
-            `shouldBe` "one: the string!"
+          `shouldBe` "one: the string!"
       it "with dashes" $ do
-        format "one: {the-key}!"
+        format
+          "one: {the-key}!"
           ((Map.singleton "the-key" "the string") :: Map TL.Text TL.Text)
-            `shouldBe` "one: the string!"
+          `shouldBe` "one: the string!"
       it "with underscores" $ do
-        format "one: {the_key}!"
+        format
+          "one: {the_key}!"
           ((Map.singleton "the_key" "the string") :: Map TL.Text TL.Text)
-            `shouldBe` "one: the string!"
+          `shouldBe` "one: the string!"
 
     it "handles additional variable containers" $ do
       format "{0}, {1}, {2}" (("one" :: String), (2 :: Int), ("three" :: String))
         `shouldBe` "one, 2, three"
       format "{0}, {2}" (Several ["zero", "one", "two" :: String])
         `shouldBe` "zero, two"
-      format "hello {name}" ([ ("name", "world" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+      format "hello {name}" ([("name", "world" :: TL.Text)] :: [(TL.Text, TL.Text)])
         `shouldBe` "hello world"
 
     it "handles defaulting containers" $ do
-      format "present: {0}; missing: {1}" (Single ("value" :: String) `withDefault` Variable ("fallback" :: TL.Text))
+      format
+        "present: {0}; missing: {1}"
+        (Single ("value" :: String) `withDefault` Variable ("fallback" :: TL.Text))
         `shouldBe` "present: value; missing: fallback"
       format "present: {0}; missing: {1}" (optional (Single ("value" :: String)))
         `shouldBe` "present: value; missing: "
@@ -74,9 +80,11 @@ main = hspec $ do
     it "handles escaped braces" $ do
       format "{{}}" () `shouldBe` "{}"
       format "\\{name\\}" () `shouldBe` "{name}"
-      format "{{{name}}}" ([ ("name", "world" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+      format "{{{name}}}" ([("name", "world" :: TL.Text)] :: [(TL.Text, TL.Text)])
         `shouldBe` "{world}"
-      format "json: {{\"answer\": \"{answer}\"}}" ([ ("answer", "ok" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+      format
+        "json: {{\"answer\": \"{answer}\"}}"
+        ([("answer", "ok" :: TL.Text)] :: [(TL.Text, TL.Text)])
         `shouldBe` "json: {\"answer\": \"ok\"}"
 
   describe "documentation" $ do
@@ -110,7 +118,8 @@ main = hspec $ do
 
     it "formats maybes" $ do
       format "Value: {:.3|<undefined>}." (Single (2.718281828 :: Float)) `shouldBe` "Value: 2.718."
-      format "Value: {:.3|<undefined>}." (Single (Nothing :: Maybe Float)) `shouldBe` "Value: <undefined>."
+      format "Value: {:.3|<undefined>}." (Single (Nothing :: Maybe Float))
+        `shouldBe` "Value: <undefined>."
       format "Value: {:.3}." (Single (Nothing :: Maybe Float)) `shouldBe` "Value: ."
 
     it "formats either and shown values" $ do
@@ -119,10 +128,12 @@ main = hspec $ do
       format "shown: {}" (Single (Shown (True, False))) `shouldBe` "shown: (True,False)"
 
     it "formats time" $ do
-      let yektLocale = defaultTimeLocale
-                         { knownTimeZones = [TimeZone (5 * 60) False "YEKT"] }
-            -- `defaultTimeLocale` does not know about Yekaterinburg.
-          Just time =  parseTimeM True yektLocale rfc822DateFormat "Sat,  3 Jun 2017 19:06:01 YEKT" :: Maybe ZonedTime
+      let yektLocale =
+            defaultTimeLocale
+              { knownTimeZones = [TimeZone (5 * 60) False "YEKT"]
+              }
+          -- `defaultTimeLocale` does not know about Yekaterinburg.
+          Just time = parseTimeM True yektLocale rfc822DateFormat "Sat,  3 Jun 2017 19:06:01 YEKT" :: Maybe ZonedTime
       format "time: {:%H:%M:%S}" (Single time) `shouldBe` "time: 19:06:01"
       format "time: {:%H:%M:%S %Z}" (Single time) `shouldBe` "time: 19:06:01 YEKT"
       format "default: {}" (Single time) `shouldBe` "default: Sat,  3 Jun 2017 19:06:01 YEKT"
@@ -136,11 +147,15 @@ main = hspec $ do
 
   describe "shell syntax" $ do
     it "formats shell-style substitutions" $ do
-      format (parseShellFormat' "hello $name") ([ ("name", "world" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+      format (parseShellFormat' "hello $name") ([("name", "world" :: TL.Text)] :: [(TL.Text, TL.Text)])
         `shouldBe` "hello world"
-      format (parseShellFormat' "hello ${name}") ([ ("name", "world" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+      format
+        (parseShellFormat' "hello ${name}")
+        ([("name", "world" :: TL.Text)] :: [(TL.Text, TL.Text)])
         `shouldBe` "hello world"
       format (parseShellFormat' "${} ${}") (("one" :: String), ("two" :: String))
         `shouldBe` "one two"
-      format (parseShellFormat' "cost: $$${amount}") ([ ("amount", "10" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+      format
+        (parseShellFormat' "cost: $$${amount}")
+        ([("amount", "10" :: TL.Text)] :: [(TL.Text, TL.Text)])
         `shouldBe` "cost: $10"

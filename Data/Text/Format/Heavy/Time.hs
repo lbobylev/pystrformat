@@ -1,4 +1,7 @@
-{-# LANGUAGE OverloadedStrings, FlexibleInstances, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE UndecidableInstances #-}
+
 -- | This module contains Formatable instances for time/date values,
 -- which use Data.Time.Format notation for formats (like @%H:%M@).
 -- Default date/time format is RFC 822.
@@ -7,24 +10,23 @@
 -- because it defines only one of possible time formatting strings syntaxes.
 -- One may like other syntax for some reason; if we re-exported this module by
 -- default, it would be impossible to hide these instances to implement other.
---
 module Data.Text.Format.Heavy.Time where
 
-import Data.String
 import Data.Char
 import Data.Default
-import Data.Time
-import Data.Time.Format
+import Data.String
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.Builder as B
+import Data.Time
+import Data.Time.Format
 
-import Data.Text.Format.Heavy.Types
-import Data.Text.Format.Heavy.Parse
 import Data.Text.Format.Heavy.Build
+import Data.Text.Format.Heavy.Parse
+import Data.Text.Format.Heavy.Types
 
 -- | Generic time formatter, using Data.Time.Format
-genericTimeFormat :: FormatTime t => VarFormat -> t -> Either String B.Builder
+genericTimeFormat :: (FormatTime t) => VarFormat -> t -> Either String B.Builder
 genericTimeFormat Nothing x = Right $ B.fromString $ formatTime defaultTimeLocale rfc822DateFormat x
 genericTimeFormat (Just fmtStr) x =
   Right $ B.fromString $ formatTime defaultTimeLocale (TL.unpack fmtStr) x
@@ -51,4 +53,3 @@ instance Formatable LocalTime where
 
 instance Formatable ZonedTime where
   formatVar fmt x = genericTimeFormat fmt x
-

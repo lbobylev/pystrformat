@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 -- | This module contains parsers for formatting strings.
 -- We have to deal with two kinds of strings:
 --
@@ -21,15 +22,18 @@
 --
 -- Variable formats syntax depends on type of data which we are going to format. These formats can be
 -- pretty complex, for example they can include alignment, rounding, and so on.
---
-module Data.Text.Format.Heavy.Parse
-  (-- * Parse functions
-   parseFormat, parseFormat',
-   parseGenericFormat, parseBoolFormat,
-   parseMaybeFormat,
-   -- * Parsec functions
-   pGenericFormat, pBoolFormat
-  ) where
+module Data.Text.Format.Heavy.Parse (
+  -- * Parse functions
+  parseFormat,
+  parseFormat',
+  parseGenericFormat,
+  parseBoolFormat,
+  parseMaybeFormat,
+
+  -- * Parsec functions
+  pGenericFormat,
+  pBoolFormat,
+) where
 
 import Data.Maybe
 import qualified Data.Text as T
@@ -37,8 +41,7 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.Builder as B
 import Text.Parsec
 
-import Data.Text.Format.Heavy.Types
 import Data.Text.Format.Heavy.Formats
-import Data.Text.Format.Heavy.Parse.VarFormat
 import Data.Text.Format.Heavy.Parse.Braces
-
+import Data.Text.Format.Heavy.Parse.VarFormat
+import Data.Text.Format.Heavy.Types

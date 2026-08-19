@@ -1,9 +1,9 @@
 -- | This is the main module of @pystrformat@ library.
--- 
--- In most cases, you need to import only this module, and probably also the 
+--
+-- In most cases, you need to import only this module, and probably also the
 -- Data.Text.Format.Heavy.Time module, if you want to format time/date values.
--- 
--- This package exports the @format@ function and @Format@ data type. 
+--
+-- This package exports the @format@ function and @Format@ data type.
 -- The Format type implements the instance of IsString, so in the code you may
 -- use formatting strings as literals, if you enable @OverloadedStrings@ extension.
 --
@@ -26,16 +26,14 @@
 --   time <- getZonedTime
 --   TLIO.putStrLn $ format "Hello, {}! It is {:%H:%M:%S} now." (name, time)
 -- @
---    
-module Data.Text.Format.Heavy
-  (
-    module Data.Text.Format.Heavy.Types,
-    module Data.Text.Format.Heavy.Formats,
-    module Data.Text.Format.Heavy.Build,
-    module Data.Text.Format.Heavy.Instances
-  ) where
+module Data.Text.Format.Heavy (
+  module Data.Text.Format.Heavy.Types,
+  module Data.Text.Format.Heavy.Formats,
+  module Data.Text.Format.Heavy.Build,
+  module Data.Text.Format.Heavy.Instances,
+) where
 
-import Data.Text.Format.Heavy.Types
-import Data.Text.Format.Heavy.Formats
 import Data.Text.Format.Heavy.Build (format)
-import Data.Text.Format.Heavy.Instances hiding (genericIntFormat, genericFloatFormat)
+import Data.Text.Format.Heavy.Formats
+import Data.Text.Format.Heavy.Instances hiding (genericFloatFormat, genericIntFormat)
+import Data.Text.Format.Heavy.Types

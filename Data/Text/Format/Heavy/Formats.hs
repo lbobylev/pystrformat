@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 -- | This module contains format descriptions for most used variable types.
 module Data.Text.Format.Heavy.Formats where
 
@@ -20,15 +21,15 @@ data Radix = Decimal | Hexadecimal
   deriving (Eq, Show)
 
 -- | Supported text conversions
-data Conversion =
-    UpperCase
+data Conversion
+  = UpperCase
   | LowerCase
   | TitleCase
   deriving (Eq, Show)
 
 -- | Generic format description. This is usable for integers, floats and strings.
-data GenericFormat = GenericFormat {
-    gfFillChar :: Char
+data GenericFormat = GenericFormat
+  { gfFillChar :: Char
   , gfAlign :: Maybe Align
   , gfSign :: Sign
   , gfLeading0x :: Bool
@@ -40,23 +41,23 @@ data GenericFormat = GenericFormat {
   deriving (Eq, Show)
 
 instance Default GenericFormat where
-  def = GenericFormat {
-          gfFillChar = ' '
-        , gfAlign = Nothing
-        , gfSign = OnlyNegative
-        , gfLeading0x = False
-        , gfWidth = Nothing
-        , gfPrecision = Nothing
-        , gfRadix = Nothing
-        , gfConvert = Nothing
-        }
+  def =
+    GenericFormat
+      { gfFillChar = ' '
+      , gfAlign = Nothing
+      , gfSign = OnlyNegative
+      , gfLeading0x = False
+      , gfWidth = Nothing
+      , gfPrecision = Nothing
+      , gfRadix = Nothing
+      , gfConvert = Nothing
+      }
 
-data BoolFormat = BoolFormat {
-    bfTrue :: TL.Text
+data BoolFormat = BoolFormat
+  { bfTrue :: TL.Text
   , bfFalse :: TL.Text
   }
   deriving (Eq, Show)
 
 instance Default BoolFormat where
   def = BoolFormat "true" "false"
-

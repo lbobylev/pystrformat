@@ -1,4 +1,9 @@
-{-# LANGUAGE ExistentialQuantification, TypeFamilies, FlexibleContexts, OverloadedStrings, CPP #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies #-}
+
 -- | This module contains basic type definitions
 module Data.Text.Format.Heavy.Types where
 
@@ -23,12 +28,15 @@ type VarName = TL.Text
 type VarFormat = Maybe TL.Text
 
 -- | String format item.
-data FormatItem =
-    FString TL.Text        -- ^ Verbatim text
-  | FVariable {
-      vName :: VarName      -- ^ Variable name
-    , vFormat :: VarFormat  -- ^ Variable format
-    }
+data FormatItem
+  = -- | Verbatim text
+    FString TL.Text
+  | FVariable
+      { vName :: VarName
+      -- ^ Variable name
+      , vFormat :: VarFormat
+      -- ^ Variable format
+      }
   deriving (Eq)
 
 instance Show FormatItem where
@@ -77,20 +85,24 @@ instance IsVarFormat () where
 class Formatable a where
   -- | Format variable according to format specification.
   -- This function should usually parse format specification by itself.
-  formatVar :: VarFormat                -- ^ Variable format specification in text form. Nothing is for default format.
-            -> a                        -- ^ Variable value.
-            -> Either String B.Builder  -- ^ Left for errors in variable format syntax, or errors during formatting.
+  formatVar
+    :: VarFormat
+    -- ^ Variable format specification in text form. Nothing is for default format.
+    -> a
+    -- ^ Variable value.
+    -> Either String B.Builder
+    -- ^ Left for errors in variable format syntax, or errors during formatting.
 
 -- | Any variable that can be substituted.
 -- This type may be also used to construct heterogeneous lists:
 -- @[Variable 1, Variable "x"] :: [Variable]@.
-data Variable = forall a. Formatable a => Variable a
+data Variable = forall a. (Formatable a) => Variable a
 
 instance Show Variable where
   show (Variable v) = either error toString $ formatVar Nothing v
-    where
-      toString :: B.Builder -> String
-      toString b = TL.unpack $ B.toLazyText b
+   where
+    toString :: B.Builder -> String
+    toString b = TL.unpack $ B.toLazyText b
 
 instance Formatable Variable where
   formatVar fmt (Variable x) = formatVar fmt x
@@ -103,8 +115,7 @@ formatAnyVar fmt (Variable v) = formatVar fmt v
 class VarContainer c where
   lookupVar :: VarName -> c -> Maybe Variable
 
-class VarContainer c => ClosedVarContainer c where
+class (VarContainer c) => ClosedVarContainer c where
   allVarNames :: c -> [VarName]
 
 ------------------------------------------------------------------------------
-
