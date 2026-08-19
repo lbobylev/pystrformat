@@ -1,0 +1,36 @@
+name: Haskell CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  cabal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haskell-actions/setup@v2
+        with:
+          ghc-version: "9.10.3"
+          cabal-version: "3.16.1.0"
+      - run: cabal update
+      - run: cabal check
+      - run: cabal v2-build all
+      - run: cabal v2-test all
+      - run: cabal v2-haddock all
+      - run: cabal v2-sdist
+
+  stack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haskell-actions/setup@v2
+        with:
+          ghc-version: "9.10.3"
+          enable-stack: true
+          stack-version: "latest"
+      - run: stack test

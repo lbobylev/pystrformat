@@ -1,12 +1,5 @@
 # pystrformat
 
-> **Project origin**
->
-> `pystrformat` is a maintained continuation of
-> [`text-format-heavy`](https://github.com/portnov/text-format-heavy) by Portnov.
-> It preserves the original library's core ideas and functionality while
-> continuing development independently under a new name.
-
 `pystrformat` is a flexible and extensible string-formatting library for Haskell.
 
 It provides formatting inspired by Python's `str.format()` syntax while keeping
@@ -152,11 +145,6 @@ conventions.
 ## Examples
 
 See the `examples/` directory and Haddock documentation for usage examples.
-
-The original project's examples and documentation may also be useful when
-working with compatible parts of the API:
-
-[`text-format-heavy`](https://github.com/portnov/text-format-heavy)
 
 ## License
 

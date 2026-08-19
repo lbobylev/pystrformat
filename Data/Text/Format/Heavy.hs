@@ -1,4 +1,4 @@
--- | This is the main module of @text-format-heavy@ library.
+-- | This is the main module of @pystrformat@ library.
 -- 
 -- In most cases, you need to import only this module, and probably also the 
 -- Data.Text.Format.Heavy.Time module, if you want to format time/date values.
@@ -39,4 +39,3 @@ import Data.Text.Format.Heavy.Types
 import Data.Text.Format.Heavy.Formats
 import Data.Text.Format.Heavy.Build (format)
 import Data.Text.Format.Heavy.Instances hiding (genericIntFormat, genericFloatFormat)
-

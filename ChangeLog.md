@@ -1,5 +1,5 @@
-# Revision history for text-format-heavy
+# Revision history for pystrformat
 
 ## 0.1.0.0  -- YYYY-mm-dd
 
-* First version. Released on an unsuspecting world.
+* Initial release of pystrformat.
