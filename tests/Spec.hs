@@ -44,6 +44,28 @@ main = hspec $ do
           ((Map.singleton "the_key" "the string") :: Map Text Text)
             `shouldBe` "one: the string!"
 
+    it "handles additional variable containers" $ do
+      format "{0}, {1}, {2}" (("one" :: String), (2 :: Int), ("three" :: String))
+        `shouldBe` "one, 2, three"
+      format "{0}, {2}" (Several ["zero", "one", "two" :: String])
+        `shouldBe` "zero, two"
+      format "hello {name}" ([ ("name", "world" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+        `shouldBe` "hello world"
+
+    it "handles defaulting containers" $ do
+      format "present: {0}; missing: {1}" (Single ("value" :: String) `withDefault` Variable ("fallback" :: TL.Text))
+        `shouldBe` "present: value; missing: fallback"
+      format "present: {0}; missing: {1}" (optional (Single ("value" :: String)))
+        `shouldBe` "present: value; missing: "
+
+    it "handles escaped braces" $ do
+      format "{{}}" () `shouldBe` "{}"
+      format "\\{name\\}" () `shouldBe` "{name}"
+      format "{{{name}}}" ([ ("name", "world" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+        `shouldBe` "{world}"
+      format "json: {{\"answer\": \"{answer}\"}}" ([ ("answer", "ok" :: TL.Text) ] :: [(TL.Text, TL.Text)])
+        `shouldBe` "json: {\"answer\": \"ok\"}"
+
   describe "documentation" $ do
     it "formats examples from wiki" $ do
       format "hex: {:#x}" (Single (427 :: Int)) `shouldBe` "hex: 0x1ab"

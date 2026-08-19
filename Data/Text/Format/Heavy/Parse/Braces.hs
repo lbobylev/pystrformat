@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 -- | This module defines the default syntax of format strings, generally described as
 -- "any part in braces is variable substitution".
 --
@@ -11,52 +12,60 @@
 -- * @"Named: {var}"@
 --
 -- * @"Specifying variable formatting: {var:+8.4}"@
---
 module Data.Text.Format.Heavy.Parse.Braces
-  (-- * Parse functions
-   parseFormat, parseFormat',
-   -- * Parsec functions
-   pBracesFormat
-     ) where
+  ( -- * Parse functions
+    parseFormat,
+    parseFormat',
+
+    -- * Parsec functions
+    pBracesFormat,
+  )
+where
 
 import Data.Maybe
 import qualified Data.Text as T
+import Data.Text.Format.Heavy.Formats
+import Data.Text.Format.Heavy.Parse.Types
+import Data.Text.Format.Heavy.Types
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.Builder as B
 import Text.Parsec
 
-import Data.Text.Format.Heavy.Types
-import Data.Text.Format.Heavy.Formats
-import Data.Text.Format.Heavy.Parse.Types
+escapes :: [(String, Char)]
+escapes =
+  [ ("{{", '{'),
+    ("}}", '}'),
+    ("\\{", '{'),
+    ("\\}", '}')
+  ]
 
--- TODO: proper handling of escaping
 anyChar' :: Parser Char
-anyChar' =
-  noneOf "{}" <|> try ('{' <$ string "\\{") <|> try ('}' <$ string "\\}")
+anyChar' = choice [c <$ string s | (s, c) <- escapes] <|> noneOf "{}"
 
 pVerbatim :: Parser FormatItem
 pVerbatim = (FString . TL.pack) `fmap` many1 anyChar'
 
 pVariable :: Parser FormatItem
 pVariable = do
-    (name, fmt) <- between (char '{') (char '}') variable
-    return $ FVariable (TL.pack name) fmt
+  (name, fmt) <- between (char '{') (char '}') variable
+  return $ FVariable (TL.pack name) fmt
   where
     variable = do
       name <- many $ try alphaNum <|> try (char '-') <|> char '.' <|> char '_'
       mbColon <- optionMaybe $ char ':'
       fmt <- case mbColon of
-               Nothing -> return Nothing
-               Just _ -> do
-                  fmtStr <- many anyChar'
-                  return $ Just $ TL.pack fmtStr
-      name' <- if null name
-                 then do
-                      st <- getState
-                      let n = psNextIndex st
-                      modifyState $ \st -> st {psNextIndex = psNextIndex st + 1}
-                      return $ show n
-                 else return name
+        Nothing -> return Nothing
+        Just _ -> do
+          fmtStr <- many anyChar'
+          return $ Just $ TL.pack fmtStr
+      name' <-
+        if null name
+          then do
+            st <- getState
+            let n = psNextIndex st
+            modifyState $ \st -> st {psNextIndex = psNextIndex st + 1}
+            return $ show n
+          else return name
       return (name', fmt)
 
 -- | Parsec parser for string format.
@@ -70,4 +79,3 @@ parseFormat text = runParser pBracesFormat initParserState "<format string>" tex
 -- | Version of parseFormat which throws @error@ in case of syntax error in the formatting string.
 parseFormat' :: TL.Text -> Format
 parseFormat' text = either (error . show) id $ parseFormat text
-
